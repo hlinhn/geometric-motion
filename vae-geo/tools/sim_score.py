@@ -10,21 +10,19 @@ import os
 import torch
 import torch.nn as nn
 
+from .paths import *
 import sys
-sys.path.append('/home/linh/projects/ACTOR')
+sys.path.append(actor_folder)
 from src.evaluate.action2motion.models import load_classifier_for_fid
 from src.utils.tensors import collate
 from src.datasets.humanact12poses import HumanAct12Poses
 from src.utils.get_model_and_data import get_model_and_data
 from src.parser.generate import parser
 
-sys.path.append('/home/linh/projects/GAN_Geometry')
-from core.visualization import render
-
-sys.path.append('/home/linh/projects/pytorch-softdtw-cuda')
+sys.path.append(dtw_folder)
 from soft_dtw_cuda import SoftDTW
 
-sys.path.append('/home/linh/projects/deep-motion-editing')
+sys.path.append(deep_edit_folder)
 from style_transfer.networks import EncoderStyle, JointGen
 from style_transfer.config import Config
 
@@ -334,7 +332,7 @@ def euc_main(save_data):
 
 def style_main():
     from style_transfer.data_loader import process_single_bvh
-    scorer = StyleScore("/home/linh/projects/deep-motion-editing/style_transfer/pretrained/pth/gen_00100000.pt")
+    scorer = StyleScore(scorer_default_paths["style"])
     # print(scorer.model.conv_model)
     # return
     cfg = Config()

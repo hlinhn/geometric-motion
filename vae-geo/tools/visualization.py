@@ -4,17 +4,19 @@ import os
 import torch
 import sys
 import numpy as np
+from PIL import Image
 
-sys.path.append("/home/linh/projects/ACTOR")
-sys.path.append("/home/linh/projects/MotionCLIP")
+from .paths import *
+sys.path.append(actor_folder)
 from src.render.renderer import get_renderer
 from src.render.rendermotion import render_video
 from src.models.rotation2xyz import Rotation2xyz
+
+sys.path.append(clip_folder)
 from clip_src.visualize.anim import plot_3d_motion
-from PIL import Image
 
 
-def render(data, param, name="test_vid.gif", save_folder="/home/linh/vae-geo"):
+def render(data, param, name="test_vid.gif", save_folder=DEFAULT_SAVE_FOLDER, class_name="unknown"):
     rotator = Rotation2xyz(device="cuda")
     xyz_gen = rotator(data["output"], None,
                       param["pose_rep"],
@@ -30,11 +32,10 @@ def render(data, param, name="test_vid.gif", save_folder="/home/linh/vae-geo"):
     renderer = get_renderer(width, height)
     path = os.path.join(save_folder, name)
     mesh = xyz_gen.cpu().detach().numpy()[0].transpose(2, 0, 1)
-    render_video(mesh, "random", "unknown", renderer, path, background)
+    render_video(mesh, "random", class_name, renderer, path, background)
 
 
 def unroll_gif(file_name, savename):
-    import matplotlib.pyplot as plt
     selected = [0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 59]
     images = []
     with Image.open(file_name) as im:
@@ -52,7 +53,6 @@ def unroll_gif(file_name, savename):
             image.getdata()
             image.putdata(newData)
             images.append(image)
-            # image.save('{}.jpg'.format(i))
     widths, heights = zip(*(i.size for i in images))
     total_width = sum(widths)
     max_height = max(heights)
@@ -65,7 +65,7 @@ def unroll_gif(file_name, savename):
     new_im.save(savename)
 
 
-def plot_3d(data, name="test_vid.gif", save_folder="/home/linh/vae-geo"):
+def plot_3d(data, name="test_vid.gif", save_folder=DEFAULT_SAVE_FOLDER):
     save_path = os.path.join(save_folder, name)
     param = {}
     param["fps"] = 20

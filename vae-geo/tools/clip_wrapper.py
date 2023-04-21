@@ -5,8 +5,9 @@ import torch.nn as nn
 import os
 import clip
 
+from .paths import *
 import sys
-sys.path.append('/home/linh/projects/MotionCLIP')
+sys.path.append(clip_folder)
 from clip_src.models import get_model as clip_get_model
 from clip_src.models.rotation2xyz import Rotation2xyz
 from clip_src.parser.tools import load_args
@@ -172,23 +173,16 @@ def make_clip_scorer(checkpoint_path):
 
 
 if __name__ == '__main__':
-    from clip_src.visualize.visualize import generate_by_video
-    from clip_src.parser.visualize import parser
-    import imageio
-    sys.path.append('/home/linh/projects/GAN_Geometry')
-    from core.visualization import render, plot_3d
-    seed = 2
-    torch.manual_seed(seed)
-    # clipper = make_clip_scorer()
-    param, folder, checkpoint, epoch = parser()
-    clipper = make_clip_wrapper(sys.argv[1])
-    z = clipper.sample_vector(sample_class=2)
+    from .visualization import render, plot_3d
+    from time import time
+    start = time()
+    clipper = make_clip_wrapper(checkpoint_default_paths["clip"])
+    loaded = time()
+    print(f"Loading took {loaded - start}")
+    sample_class = 2
+    z = clipper.sample_vector(sample_class=sample_class)
     gen = clipper.generate(z, durations=torch.ones((1, 1), dtype=int) * 60)
-    print(gen["output_xyz"].shape)
-    print(gen["lengths"].shape)
-    # plot_3d(gen)
-    render(gen, clipper.param, "/home/linh/vae-geo/actor_renderer2.gif")
-    # gen["output_xyz"] = gen["output_xyz"].reshape(1, 1, *gen["output_xyz"].shape[1:])
-    # gen["lengths"] = gen["lengths"][None]
-    # fr = generate_by_video({}, {}, gen, lambda x: str(x), param, 1, 1, "/home/linh/vae-geo")
-    # imageio.mimsave("/home/linh/vae-geo/test.gif", fr, fps=param["fps"])
+    generated = time()
+    print(f"Generation took {generated - loaded}")
+    render(gen, clipper.param, f"{DEFAULT_SAVE_FOLDER}/clip_gen_class_{sample_class}.gif")
+    print(f"Rendering took {time() - generated}")

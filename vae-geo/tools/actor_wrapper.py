@@ -5,11 +5,14 @@ import torch
 import os
 import numpy as np
 
+from .paths import *
 import sys
-sys.path.append('/home/linh/projects/ACTOR')
+sys.path.append(actor_folder)
+
 from src.utils import get_model_and_data as actor_get_model_and_data
 from src.models.rotation2xyz import Rotation2xyz
 from src.parser.tools import load_args
+
 
 class ActorWrapper():
     def __init__(self, param, checkpoint_path):
@@ -72,19 +75,22 @@ def make_actor_wrapper(checkpoint_path):
     folder, checkpoint = os.path.split(checkpoint_path)
     param = load_args(os.path.join(folder, "opt.yaml"))
     param["device"] = "cuda"
+    param["datapath"] = HUMANACT12_DATAPATH
     actor = ActorWrapper(param, checkpoint_path)
     return actor
 
 
-def test_wrapper():
-    actor = make_actor_wrapper(sys.argv[1])
-    print(actor.param)
-    ref = actor.sample_vector()
-    res = actor.generate(ref)
-    print(res["output"].shape)
-    # render(res, actor)
-
-
 if __name__ == '__main__':
-    test_wrapper()
-    # make_actor_wrapper()
+    from time import time
+    from .visualization import render, plot_3d
+    start = time()
+    actor = make_actor_wrapper(checkpoint_default_paths["actor"])
+    loaded = time()
+    print(f"Loading took {loaded - start}")
+    sample_class = None
+    ref = actor.sample_vector(sample_class=None)
+    res = actor.generate(ref)
+    generated = time()
+    print(f"Generation took {generated - loaded}")
+    render(res, actor.param, f"{DEFAULT_SAVE_FOLDER}/actor_gen_class_{sample_class}.gif")
+    print(f"Rendering took {time() - generated}")
