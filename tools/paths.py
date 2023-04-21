@@ -22,3 +22,6 @@ scorer_default_paths = {
 }
 
 HUMANACT12_DATAPATH = f"{actor_folder}/data/HumanAct12Poses"
+
+available_dist_functions = ["fid", "subseq", "encoder", "euc", "skel", "low"]
+available_wrappers = ["actor", "clip"]

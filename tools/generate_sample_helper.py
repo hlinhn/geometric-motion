@@ -9,13 +9,14 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from tqdm import tqdm
 import sys
 sys.path.append(geometry_folder)
 
 from core.geometry_utils import LExpMap, SExpMap, LERP
 
 
-def visualize_action(eigvec, ref_codes, G, maxdist=3.0, rown=7, name="", save_folder=DEFAULT_SAVE_FOLDER):
+def visualize_action(eigvec, ref_codes, G, maxdist=3.0, rown=7, name="", save_folder=DEFAULT_SAVE_FOLDER, pbar=None):
     reflist = list(ref_codes)
     for idx, ref_code in enumerate(reflist):
         ref_code_send = ref_code.clone().detach().cpu().numpy()
@@ -24,6 +25,8 @@ def visualize_action(eigvec, ref_codes, G, maxdist=3.0, rown=7, name="", save_fo
             vid = G.generate(torch.tensor(np.expand_dims(feat, axis=0), dtype=torch.float).to("cuda"))
             # plot_3d(vid, name=f"{name}_vid_{ni}.gif", save_folder=save_folder)
             render(vid, G.param, f"{name}_vid_{ni}.gif", save_folder)
+            if pbar is not None:
+                pbar.update()
 
 
 def visualize_distance(ref_code, eigvect, eigval, G, dist,
@@ -53,9 +56,10 @@ def visualize_distance(ref_code, eigvect, eigval, G, dist,
     plt.savefig(os.path.join(figdir, f"imdist-{namestr}.jpg"))
 
 
-def test_hessian(wrapper, dist, save_folder, eiglist, cl=0, samples=10, maxdist=3.0, cut_off=20):
+def test_hessian(wrapper, dist, save_folder, eiglist, cl=0, samples=10, maxdist=3.0, cut_off=20, viz_split=7):
     eig_vector_list = [int(x) for x in eiglist.split(',')]
-    for i in tqdm(range(samples)):
+    pbar = tqdm(total=samples*len(eig_vector_list) * viz_split, position=0, leave=True)
+    for i in range(samples):
         feat = wrapper.sample_vector(sampn=1, sample_class=cl)
         eva_BP, evc_BP, H_BP = vae_hessian(wrapper, feat, dist, cut_off=cut_off)
         visualize_distance(feat, evc_BP, eva_BP, wrapper, dist,
@@ -65,5 +69,7 @@ def test_hessian(wrapper, dist, save_folder, eiglist, cl=0, samples=10, maxdist=
                            figdir=save_folder)
         for j in eig_vector_list:
             visualize_action(evc_BP.T[-j - 1], feat, wrapper,
+                             rown=viz_split,
                              name=f"class_{cl}_sample_{i}_eig_{j}",
-                             save_folder=save_folder, maxdist=maxdist)
+                             save_folder=save_folder, maxdist=maxdist, pbar=pbar)
+    pbar.close()
