@@ -130,7 +130,7 @@ def sample_and_calculate(args):
     time_suffix = now.strftime("%d%m_%H%M")
     wrapper = make_wrapper(args.wrapper)
     scorer = make_scorer(args.scorer)
-    to_calculate = args.calculate_class.split(',')
+    to_calculate = args.sample_class.split(',')
     for cl in to_calculate:
         if cl == "None":
             sample_cl = None
@@ -169,36 +169,34 @@ def geodesic_exp(args):
     torch.manual_seed(seed)
     wrapper = make_wrapper(args.wrapper)
 
-    if args.geogen:
+    if args.gen:
         filename = create_graph(wrapper, 0, 70, filename=f"geodesic-{args.wrapper}-{args.scorer}")
         print(filename)
         return
 
     now = datetime.now()
     time_suffix = now.strftime("%d%m_%H%M")
-    path = np.load(args.geopath)
+    path = np.load(args.path)
     feats = path["path"]
     print(len(feats))
     save_folder = f"{DEFAULT_SAVE_FOLDER}/geodesic_{args.wrapper}_{args.scorer}_{time_suffix}"
     os.makedirs(save_folder, exist_ok=True)
 
     # straight line
-    if args.geo_straight:
+    if args.straight:
         start_code = feats[0]
         end_code = feats[-1]
-        generate_visualization(wrapper, start_code, end_code, args.geo_linear, save_folder)
+        generate_visualization(wrapper, start_code, end_code, args.linear, save_folder)
 
     for i in range(len(feats) - 1):
         s = feats[i]
         e = feats[i + 1]
-        generate_visualization(wrapper, s, e, args.geo_step, save_folder,
-                               name="riemann", start_ind=args.geo_step * i)
+        generate_visualization(wrapper, s, e, args.step, save_folder,
+                               name="riemann", start_ind=args.step * i)
 
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument("--wrapper", default="actor", choices=available_wrappers)
-    parser.add_argument("--scorer", default="fid", choices=available_dist_functions)
 
     subparsers = parser.add_subparsers(help='commands', dest='task')
     visualize_parser = subparsers.add_parser('visualize')
@@ -207,11 +205,15 @@ if __name__ == '__main__':
     visualize_parser.add_argument("--maxdist", default=3.0, type=float)
     visualize_parser.add_argument("--eiglist", default="0,2,4,8,16")
     visualize_parser.add_argument("--cutoff", default=20, type=int)
+    visualize_parser.add_argument("--wrapper", default="actor", choices=available_wrappers)
+    visualize_parser.add_argument("--scorer", default="fid", choices=available_dist_functions)
 
     calculate_parser = subparsers.add_parser('calculate')
     calculate_parser.add_argument("--num_trials", default=50, type=int)
     calculate_parser.add_argument("--sample_class", default="None")
     calculate_parser.add_argument("--cutoff", default=20, type=int)
+    calculate_parser.add_argument("--wrapper", default="actor", choices=available_wrappers)
+    calculate_parser.add_argument("--scorer", default="fid", choices=available_dist_functions)
 
     anisotropy_parser = subparsers.add_parser('anisotropy')
     anisotropy_parser.add_argument("--dir", default=f"{DEFAULT_SAVE_FOLDER}/genfull_1904_0307")
@@ -222,6 +224,7 @@ if __name__ == '__main__':
     geodesic_parser.add_argument("--straight", action='store_true')
     geodesic_parser.add_argument("--linear", default=20, type=int)
     geodesic_parser.add_argument("--step", default=5, type=int)
+    geodesic_parser.add_argument("--wrapper", default="actor", choices=available_wrappers)
 
 
     genfull_parser = subparsers.add_parser('genfull')
