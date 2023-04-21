@@ -11,3 +11,15 @@ Example
 ```
 python3 main.py visualize --wrapper clip --scorer low --cutoff 50 --sample_class 4 --num_samples 2 --eiglist 0,4,10,30,49 --maxdist 0.5
 ```
+
+### How to add another distance function
+
+1. Add the distance function to `tools/sim_score.py`
+2. Update the list of `available_dist_functions` in `tools/paths.py`
+3. Update `make_scorer` in `main.py`
+
+### How to add another generator
+
+1. Add the wrapper file of the generator to `tools/`. This wrapper should include a `sample_vector` function and a `generate` function
+2. Update the list of `available_wrappers` in `tools/paths.py`
+3. Update `make_wrapper` in `main.py`
