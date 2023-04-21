@@ -86,7 +86,18 @@ def anisotropy(savedir):
                 continue
 
 
+def parse_wrapper_and_scorer(args):
+    scorers = args.slist.split(',')
+    if scorers[0] == "all":
+        scorers = available_dist_functions
+    wrappers = args.wlist.split(',')
+    if wrappers[0] == "all":
+        wrappers = available_wrappers
+    return scorers, wrappers
+
+
 def genfull(args):
+    scorers, wrappers = parse_wrapper_and_scorer(args)
     now = datetime.now()
     time_suffix = now.strftime("%d%m_%H%M")
     seed = 20
@@ -94,9 +105,9 @@ def genfull(args):
 
     folder = f"{DEFAULT_SAVE_FOLDER}/genfull_{time_suffix}"
     os.makedirs(folder, exist_ok=True)
-    for w in available_wrappers:
+    for w in wrappers:
         wrapper = make_wrapper(w)
-        for s in available_dist_functions:
+        for s in scorers:
             scorer = make_scorer(s)
             feat = wrapper.sample_vector(sampn=1, sample_class=None)
             eva_f, evc_f, H_f = calculate_full_hessian(wrapper, feat, scorer)
@@ -143,12 +154,7 @@ def sample_and_calculate(args):
 
 
 def sample_full(args):
-    scorers = args.slist.split(',')
-    if scorers[0] == "all":
-        scorers = available_dist_functions
-    wrappers = args.wlist.split(',')
-    if wrappers[0] == "all":
-        wrappers = available_wrappers
+    scorers, wrappers = parse_wrapper_and_scorer(args)
     now = datetime.now()
     time_suffix = now.strftime("%d%m_%H%M")
     cutoff = {"actor": 20, "clip": 50}
@@ -228,10 +234,12 @@ if __name__ == '__main__':
 
 
     genfull_parser = subparsers.add_parser('genfull')
+    genfull_parser.add_argument("--wlist", default="all", help="List of wrappers, separated by comma")
+    genfull_parser.add_argument("--slist", default="all", help="List of distance functions, separated by comma")
 
     samplefull_parser = subparsers.add_parser('samplefull')
     samplefull_parser.add_argument("--wlist", default="actor", help="List of wrappers, separated by comma")
-    samplefull_parser.add_argument("--slist", default="fid", help="List of distance functions, separated by comma")
+    samplefull_parser.add_argument("--slist", default="all", help="List of distance functions, separated by comma")
     samplefull_parser.add_argument("--num_trials", default=50, type=int)
 
 
