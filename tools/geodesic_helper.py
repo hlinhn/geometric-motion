@@ -15,20 +15,41 @@ sys.path.append(geometry_folder)
 
 from core.geometry_utils import LERP
 
-def riemannian_distance(H, start, end):
-    diff = start - end
-    l = np.sqrt(diff @ H @ diff.T)
+
+def riemannian_distance(H, start, end, num_steps):
+    interp = LERP(start, end, num_steps)
+    l = 0
+    for i in range(len(interp) - 1):
+        diff = interp[i + 1] - interp[i]
+        l += np.sqrt(diff @ H @ diff.T)
     return l
 
 
+def from_saved_data():
+    saved_data_list = [
+        f'{DEFAULT_SAVE_FOLDER}/encoder_sample_class2',
+        f'{DEFAULT_SAVE_FOLDER}/encoder_sample_class7',
+        f'{DEFAULT_SAVE_FOLDER}/calculate_actor_encoder_5_1404_0608',
+        f'{DEFAULT_SAVE_FOLDER}/calculate_actor_encoder_6_1404_0708'
+    ]
+
+    all_feats = []
+    all_hs = []
+    all_name = []
+    for filename in saved_data_list:
+        _, _, feat, name, h = load_saved_data(filename)
+        all_feats.append(feat)
+        all_hs.append(hs)
+        all_name.append(name)
+
+    all_feats = np.concatenate(all_feats, axis=0)
+    all_hs = np.concatenate(all_hs, axis=0)
+    all_name = np.concatenate(all_name, axis=0)
+    return all_feats, all_hs, all_name
+
+
 def create_graph(wrapper, n_steps, n_neighbors, filename="paths_encoder"):
-    _, _, feat1, name1, hs1 = load_saved_data(f'{DEFAULT_SAVE_FOLDER}/encoder_sample_class2')
-    _, _, feat2, name2, hs2 = load_saved_data(f'{DEFAULT_SAVE_FOLDER}/encoder_sample_class7')
-    _, _, feat3, name3, hs3 = load_saved_data(f'{DEFAULT_SAVE_FOLDER}/calculate_actor_encoder_5_1404_0608')
-    _, _, feat4, name4, hs4 = load_saved_data(f'{DEFAULT_SAVE_FOLDER}/calculate_actor_encoder_6_1404_0708')
-    all_feats = np.concatenate((feat1, feat2, feat3, feat4), axis=0)
-    all_hs = np.concatenate((hs1, hs2, hs3, hs4), axis=0)
-    all_name = np.concatenate((name1, name2, name3, name4), axis=0)
+    all_feats, all_hs, all_name = from_saved_data()
     n_data = len(all_feats)
     knn = NearestNeighbors(n_neighbors=n_neighbors, metric='euclidean')
     knn.fit(all_feats)
@@ -46,7 +67,7 @@ def create_graph(wrapper, n_steps, n_neighbors, filename="paths_encoder"):
             if (i, ix) in G.edges or (ix, i) in G.edges or i == ix:
                 continue
 
-            L_riemann = riemannian_distance(all_hs[i], all_feats[i], all_feats[ix:ix+1])
+            L_riemann = riemannian_distance(all_hs[i], all_feats[i], all_feats[ix:ix+1], n_steps)
             L_euclidean = dist
             edge_attr = {'weight': float(1/L_riemann),
                          'weight_euclidean': float(1/L_euclidean),
