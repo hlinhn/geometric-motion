@@ -33,10 +33,12 @@ python3 main.py visualize --wrapper clip --scorer low --cutoff 50 --sample_class
 Binxu Wang, Carlos R. Ponce (2021).
 The Geometry of Deep generative image models and its Application.
 ICLR 2021
+
 <a id="2">[2]</a>
 Guy Tevet, Brian Gordon, Amir Hertz, Amit H. Bermano, Daniel Cohen-Or (2022).
 MotionCLIP: Exposing HUman Motion Generaion to CLIP Space.
 ECCV 2022
+
  <a id="3">[3]</a>
 Mathis Petrovich, Michael J. Black, Gül Varol (2021).
 Action-Conditioned 3D Human Motion Synthesis with Transformer VAE.
