@@ -5,7 +5,7 @@ Based on the work done by Wang and Ponce [[1]](#1), we analyzed the structure of
 ### How to run
 
 1. `conda env create -f environment.yml`
-2. Get the code from [MotionCLIP](https://github.com/GuyTevet/MotionCLIP)[[2]](#2), [ACTOR](https://github.com/Mathux/ACTOR)[[3]](#3) and [GAN-Geometry](https://github.com/Animadversio/GAN-Geometry)[[1]](#1). To run ACTOR and MotionCLIP simultaneously, rename MotionCLIP `src` folder to `clip_src`
+2. Get the code from [MotionCLIP](https://github.com/GuyTevet/MotionCLIP) [[2]](#2), [ACTOR](https://github.com/Mathux/ACTOR) [[3]](#3) and [GAN-Geometry](https://github.com/Animadversio/GAN-Geometry) [[1]](#1). To run ACTOR and MotionCLIP simultaneously, rename MotionCLIP `src` folder to `clip_src`
 3. Change the path in `tools/paths.py` to point to the correct path for these repos
 4. The main file is `main.py`. You can specify the generator and the distance function to test. There are a few tasks, the two most important ones are calculating the Hessian at some randomly sampled points (`python3 main.py calculate`) and visualizing the changes in generated motion sequences while moving along the dominant eigenvectors (`python3 main.py visualize`)
 
