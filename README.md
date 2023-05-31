@@ -1,5 +1,7 @@
 # Interpretable axes from geometry analysis of human motion generators
 
+Based on the work done by Wang and Ponce [[1]](#1), we analyzed the structure of the latent space of human motion learned by VAEs, to understand if these spaces contain interpretable change directions even without explicit training.
+
 ### How to run
 
 1. `conda env create -f environment.yml`
@@ -24,3 +26,10 @@ python3 main.py visualize --wrapper clip --scorer low --cutoff 50 --sample_class
 1. Add the wrapper file of the generator to `tools/`. This wrapper should include a `sample_vector` function and a `generate` function
 2. Update the list of `available_wrappers` in `tools/paths.py`
 3. Update `make_wrapper` in `main.py`
+
+
+#### References
+<a id="1">[1]</a>
+Binxu Wang, Carlos R. Ponce (2021).
+The Geometry of Deep generative image models and its Application
+ICLR 2021
