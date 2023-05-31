@@ -36,7 +36,7 @@ ICLR 2021
 
 <a id="2">[2]</a>
 Guy Tevet, Brian Gordon, Amir Hertz, Amit H. Bermano, Daniel Cohen-Or (2022).
-MotionCLIP: Exposing HUman Motion Generaion to CLIP Space.
+MotionCLIP: Exposing Human Motion Generation to CLIP Space.
 ECCV 2022
 
  <a id="3">[3]</a>
